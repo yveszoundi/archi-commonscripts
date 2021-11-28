@@ -3,7 +3,7 @@
 * What is this?
 
 This is a subset of [[https://www.archimatetool.com/][Archi]] scripts that I frequently use:
-- Some of them were created by the community
+- Some of them were [[https://gist.github.com/search?utf8=%E2%9C%93&q=%23jarchi+extension%3Aajs&ref=searchresults][created by the community]]
 - I also regularly create additional scripts: I might publish more of them on Github, time will tell.
 
 * Requirements
