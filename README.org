@@ -1,0 +1,24 @@
+#+TITLE: README
+
+* What is this?
+
+This is a subset of [[https://www.archimatetool.com/][Archi]] scripts that I frequently use:
+- Some of them were created by the community
+- I also regularly create additional scripts: I might publish more of them on Github, time will tell.
+
+* Requirements
+
+- Archi 4.9.x (this has only been tested with the latest version of
+- The latest version of [[https://www.archimatetool.com/plugins/#jArchi][jArchi]] compatible with Archi 4.9.x
+- The [[https://www.graalvm.org/][GraalVM]] JavaScript engine selected in Archi preferences (=Scripting > JavaScript Engine=)
+
+* How to use it?
+
+Please link the contents of this repository under your jArchi scripts folder (=Preferences >Scriting > Scripts folder:=): if you still don't understand the procedure, please visit the [[https://github.com/archimatetool/archi-scripting-plugin/wiki/jArchi-Quick-Start][jArchi wiki]] or [[https://forum.archimatetool.com/index.php?board=5.0][forum]].
+
+You can then right-click on any diagram in Archi and explore available scripts (=Scripts= context menu).
+
+
+* Contributing
+
+The best way to contribute is via a pull request.
