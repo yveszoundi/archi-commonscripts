@@ -8,7 +8,7 @@ This is a subset of [[https://www.archimatetool.com/][Archi]] scripts that I fre
 
 * Requirements
 
-- Archi 4.9.x (this has only been tested with the latest version of
+- [[https://www.archimatetool.com/download/][Archi 4.9.x]]
 - The latest version of [[https://www.archimatetool.com/plugins/#jArchi][jArchi]] compatible with Archi 4.9.x
 - The [[https://www.graalvm.org/][GraalVM]] JavaScript engine selected in Archi preferences (=Scripting > JavaScript Engine=)
 
