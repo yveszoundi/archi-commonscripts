@@ -1,6 +1,6 @@
 // This is a variation of AlignSpreadHorizontally.ajs
 
-console.log("Start: Spread and Align vertically");
+console.log("START> Spread and Align vertically");
 
 minY = null;
 minX = null;
@@ -31,4 +31,4 @@ $(selection).each(function (element) {
 
 }); 
 
-console.log("End: Spread and Align vertically");
+console.log("END> Spread and Align vertically");

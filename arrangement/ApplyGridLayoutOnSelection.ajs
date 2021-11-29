@@ -1,0 +1,52 @@
+console.clear()
+console.show()
+
+console.log("START> Apply grid layout")
+
+let gap = 10
+let columnCountText = window.prompt("Columns", "1")
+
+if (isNaN(columnCountText)) {
+  console.log("Unexpected number of columns for input: '" + columnCountText + "'. Please enter a number greater than 0.")
+  console.log("END> Apply grid layout")
+  exit(1)
+}
+
+let columnCount = parseInt(columnCountText)
+
+if (columnCount <= 0) {
+  console.log("Unexpected number of columns for input: '" + columnCountText + "'. Please enter a number greater than 0.")
+  console.log("END> Apply grid layout")
+  exit(1)
+}
+
+let topPadding = gap
+let bottomPadding = gap
+
+$(selection).each(function(e) {
+  let selectedElement = $(e)
+
+  let itemCount = selectedElement.children().length
+  let rowCount = parseInt(Math.ceil(itemCount / columnCount))
+  let itemWidth = parseInt( (e.bounds.width - (topPadding * 2) - (gap * (1 + columnCount))) / columnCount)
+  let itemHeight = parseInt( (e.bounds.height  - (topPadding * 2) - (gap * (1.5 + rowCount))) / rowCount)
+
+  let columnIndex = 0
+  let currentX = gap + topPadding
+  let currentY = gap * 1.5 + topPadding
+
+  selectedElement.children().each(function (childElement) {
+    childElement.bounds = { x: currentX, y: currentY, width: itemWidth, height: itemHeight }
+    columnIndex++
+    currentX = currentX + itemWidth + gap
+
+    if (columnIndex >= (columnCount)) {
+      currentY = currentY + itemHeight + gap
+      columnIndex = 0
+      currentX = (gap + topPadding)
+    }
+  })
+
+})
+
+console.log("END> Apply grid layout")

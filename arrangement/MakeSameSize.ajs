@@ -1,6 +1,6 @@
 // Apply the biggest size to all selected objects
 console.clear()
-console.log("Start: Make same size")
+console.log("START> Make same size")
 
 let maxWidth = 0
 let maxHeight = 0
@@ -26,4 +26,4 @@ $(selection).each(function (element) {
   }
 })
 
-console.log("End: Make same size")
+console.log("END> Make same size")
