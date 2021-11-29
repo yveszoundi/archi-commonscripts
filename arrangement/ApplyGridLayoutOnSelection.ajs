@@ -23,6 +23,18 @@ if (columnCount <= 0) {
 let topPadding = gap
 let bottomPadding = gap
 
+if ($(selection).length) {
+  if ($(selection).length == 1) {
+    let selectionType = $(selection).first().type
+
+    if (selectionType == 'archimate-diagram-model' || selectionType == 'sketch-model' || selectionType == 'canvas-model') {
+      console.log("Please select an object on the actual diagram!!!")
+      console.log("END> Apply grid layout")
+      exit(1)
+    }
+  }
+}
+
 $(selection).each(function(e) {
   let selectedElement = $(e)
 
