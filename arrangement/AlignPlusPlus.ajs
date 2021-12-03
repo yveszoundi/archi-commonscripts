@@ -1,6 +1,7 @@
-// Align a set of selected elements (left, top, right or bottom)
+// Align a set of selected elements (left, right)
 
 // This doesn't require objects to be part of the same layer, they could be nested within different containers
+// We can't deal "efficiently" with top, bottom alignment. This would require to compute relative Y coordinates (account for parent bounds)
 
 /**
  * @typedef {any} JavaClass
@@ -41,8 +42,8 @@ let cfgDialog = {
    * Default values
    */
   config: {
-    alignmentTypes: ["top", "left", "bottom", "right"],
-    alignmentType: "auto"
+    alignmentTypes: ["left", "right"],
+    alignmentType: "left"
   },
 
   // widgets memorized to get value from before closing
@@ -138,20 +139,14 @@ let cfgDialog = {
 
 function alignElements(alignmentType) {
   let minStartingX = Number.MAX_SAFE_INTEGER
-  let minStartingY = Number.MAX_SAFE_INTEGER
   let maxEndingX   = Number.MIN_SAFE_INTEGER
-  let maxEndingY   = Number.MIN_SAFE_INTEGER
 
   // Determine the width, height,  and
   $(selection).each(function(element) {
     if (alignmentType == "left") {
       minStartingX = Math.min(minStartingX, element.bounds.x)
-    } else if (alignmentType == "top") {
-      minStartingY = Math.min(minStartingY, element.bounds.y)
-    } else if (alignmentType == "right") {
-      maxEndingX = Math.max(maxEndingX, element.bounds.x + element.bounds.width)
     } else {
-      maxEndingY = Math.max(maxEndingY, element.bounds.y + element.bounds.height)
+      maxEndingX = Math.max(maxEndingX, element.bounds.x + element.bounds.width)
     }
   })
 
@@ -166,12 +161,8 @@ function alignElements(alignmentType) {
 
     if (alignmentType == "left") {
       newBounds.x = minStartingX
-    } else if (alignmentType == "top") {
-      newBounds.y = minStartingY
-    } else if (alignmentType == "right") {
-      newBounds.x = maxEndingX - newBounds.width
     } else {
-      newBounds.y = maxEndingY - newBounds.height
+      newBounds.x = maxEndingX - newBounds.width
     }
 
     element.bounds = newBounds
