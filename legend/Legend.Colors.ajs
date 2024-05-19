@@ -1,0 +1,202 @@
+//
+// Generate diagram legend based on background colors
+//
+// 2020 David GERARD
+// Adjustments by Yves Zoundi
+//
+// TODO cleanup the code...
+//
+//
+load(__SCRIPTS_DIR__ + "lib/colors.lib.js")
+// # Functions
+
+// # Variables
+
+var x = 10
+var y = 10
+var default_width = 30
+var default_height = 30
+var typeSet = new Set()
+var pictogram_x = x// + 10
+var label_x = x// + pictogram_x + 10
+var label_width = default_width + 10
+var groupWidth = /*10 + default_width*/ + default_width /*+ 10*/
+var groupHeight = default_height + y
+var prefix = ""
+var groupName = "Legend"
+var noteFigureType = 0
+var noteOpacity = 255
+var noteOutlineOpacity  = 255
+var defaultFontSize = 10
+
+// Get Archi's Preference Store
+const archiPrefs = Java.type('com.archimatetool.editor.ArchiPlugin').PREFERENCES
+
+// Declare the Eclipse FontData class
+// See https://github.com/eclipse-platform/eclipse.platform.swt/blob/master/bundles/org.eclipse.swt/Eclipse%20SWT/gtk/org/eclipse/swt/graphics/FontData.java
+const FontDataClass = Java.type('org.eclipse.swt.graphics.FontData')
+
+// Get the default font string for diagram objects
+var defaultViewFont = archiPrefs.getString('defaultViewFont')
+let defaultFontName = "monospace"
+let Font = Java.type("java.awt.Font")
+let defaultFontStyle = Font.PLAIN
+
+
+// If we have it...
+if(defaultViewFont) {
+  let fontData = new FontDataClass(defaultViewFont)
+  defaultFontSize = Math.floor(fontData.getHeight() * 0.85)
+  defaultFontName = fontData.getName()
+  defaultFontStyle = fontData.getStyle()
+}
+
+// # Main
+
+
+
+console.show()
+console.clear()
+console.log("> Generate diagram legend:")
+
+var currentView  = $(selection).filter("archimate-diagram-model").first()//= selection.first()
+if (! currentView) {
+  console.log("> No view identified: exiting.")
+  exit()
+}
+
+const hexColorsByElementType = {
+  "application-collaboration" : archiPrefs.getString("defaultFillColour_ApplicationCollaboration"),
+  "application-component"     : archiPrefs.getString("defaultFillColour_ApplicationComponent"),
+  "application-event"         : archiPrefs.getString("defaultFillColour_ApplicationEvent"),
+  "application-function"      : archiPrefs.getString("defaultFillColour_ApplicationFunction"),
+  "application-interaction"   : archiPrefs.getString("defaultFillColour_ApplicationInteraction"),
+  "application-interface"     : archiPrefs.getString("defaultFillColour_ApplicationInterface"),
+  "application-process"       : archiPrefs.getString("defaultFillColour_ApplicationProcess"),
+  "application-service"       : archiPrefs.getString("defaultFillColour_ApplicationService"),
+  "artifact"                  : archiPrefs.getString("defaultFillColour_Artifact"),
+  "assessment"                : archiPrefs.getString("defaultFillColour_Assessment"),
+  "business-actor"            : archiPrefs.getString("defaultFillColour_BusinessActor"),
+  "business-collaboration"    : archiPrefs.getString("defaultFillColour_BusinessCollaboration"),
+  "business-event"            : archiPrefs.getString("defaultFillColour_BusinessEvent"),
+  "business-function"         : archiPrefs.getString("defaultFillColour_BusinessFunction"),
+  "business-interaction"      : archiPrefs.getString("defaultFillColour_BusinessInteraction"),
+  "business-interface"        : archiPrefs.getString("defaultFillColour_BusinessInterface"),
+  "business-object"           : archiPrefs.getString("defaultFillColour_BusinessObject"),
+  "business-process"          : archiPrefs.getString("defaultFillColour_BusinessProcess"),
+  "business-role"             : archiPrefs.getString("defaultFillColour_BusinessRole"),
+  "business-service"          : archiPrefs.getString("defaultFillColour_BusinessService"),
+  "communication-network"     : archiPrefs.getString("defaultFillColour_CommunicationNetwork"),
+  "capability"                : archiPrefs.getString("defaultFillColour_Capability"),
+  "constraint"                : archiPrefs.getString("defaultFillColour_Constraint"),
+  "contract"                  : archiPrefs.getString("defaultFillColour_Contract"),
+  "course-of-action"          : archiPrefs.getString("defaultFillColour_CourseOfAction"),
+  "data-object"               : archiPrefs.getString("defaultFillColour_DataObject"),
+  "deliverable"               : archiPrefs.getString("defaultFillColour_Deliverable"),
+  "device"                    : archiPrefs.getString("defaultFillColour_Device"),
+  "junction"                  : archiPrefs.getString("defaultFillColour_Junction"),
+  "diagram-model-group"       : archiPrefs.getString("defaultFillColour_DiagramModelGroup"),
+  "distribution-network"      : archiPrefs.getString("defaultFillColour_DistributionNetwork"),
+  "driver"                    : archiPrefs.getString("defaultFillColour_Driver"),
+  "equipment"                 : archiPrefs.getString("defaultFillColour_Equipment"),
+  "facility"                  : archiPrefs.getString("defaultFillColour_Facility"),
+  "gap"                       : archiPrefs.getString("defaultFillColour_Gap"),
+  "goal"                      : archiPrefs.getString("defaultFillColour_Goal"),
+  "grouping"                  : archiPrefs.getString("defaultFillColour_Grouping"),
+  "implementation-event"      : archiPrefs.getString("defaultFillColour_ImplementationEvent"),
+  "location"                  : archiPrefs.getString("defaultFillColour_Location"),
+  "material"                  : archiPrefs.getString("defaultFillColour_Material"),
+  "meaning"                   : archiPrefs.getString("defaultFillColour_Meaning"),
+  "node"                      : archiPrefs.getString("defaultFillColour_Node"),
+  "outcome"                   : archiPrefs.getString("defaultFillColour_Outcome"),
+  "path"                      : archiPrefs.getString("defaultFillColour_Path"),
+  "plateau"                   : archiPrefs.getString("defaultFillColour_Plateau"),
+  "principle"                 : archiPrefs.getString("defaultFillColour_Principle"),
+  "product"                   : archiPrefs.getString("defaultFillColour_Product"),
+  "representation"            : archiPrefs.getString("defaultFillColour_Representation"),
+  "resource"                  : archiPrefs.getString("defaultFillColour_Resource"),
+  "requirement"               : archiPrefs.getString("defaultFillColour_Requirement"),
+  "stakeholder"               : archiPrefs.getString("defaultFillColour_Stakeholder"),
+  "system-software"           : archiPrefs.getString("defaultFillColour_SystemSoftware"),
+  "technology-collaboration"  : archiPrefs.getString("defaultFillColour_TechnologyCollaboration"),
+  "technology-event"          : archiPrefs.getString("defaultFillColour_TechnologyEvent"),
+  "technology-function"       : archiPrefs.getString("defaultFillColour_TechnologyFunction"),
+  "technology-interaction"    : archiPrefs.getString("defaultFillColour_TechnologyInteraction"),
+  "technology-interface"      : archiPrefs.getString("defaultFillColour_TechnologyInterface"),
+  "technology-process"        : archiPrefs.getString("defaultFillColour_TechnologyProcess"),
+  "technology-service"        : archiPrefs.getString("defaultFillColour_TechnologyService"),
+  "value"                     : archiPrefs.getString("defaultFillColour_Value"),
+  "value-stream"              : archiPrefs.getString("defaultFillColour_ValueStream"),
+  "work-package"              : archiPrefs.getString("defaultFillColour_WorkPackage")
+}
+
+// Loop through all elements used in selected view and pus into array elements type
+let originalLabelWidth = label_width
+let maxLabelWidth = label_width
+
+function _legendStringWidth(nodeLabel) {
+  let Canvas = Java.type("java.awt.Canvas")
+  let font = new Font(defaultFontName, defaultFontStyle, defaultFontSize)
+  let c = new Canvas()
+  let fm = c.getFontMetrics(font)
+
+  return fm.stringWidth(nodeLabel)
+}
+
+function _prefixNameFor(prefix, colorHex) {
+  return prefix + colorHex.replaceAll("#", "")
+}
+
+$(currentView).find().not("relationship").each(function(e) {
+  const typeName = e.type
+  if (typeName == 'diagram-model-group'
+      || typeName == 'diagram-model-note'
+      || typeName == 'diagram-model-connection'
+      || typeName == 'archimate-diagram-model') {
+    return
+  }
+  let measuredLabelWidth = _legendStringWidth(typeName)
+  maxLabelWidth = Math.max(maxLabelWidth, measuredLabelWidth)
+  let colorHex = e.fillColor || hexColorsByElementType[typeName]
+  typeSet.add(colorHex)
+})
+label_width = maxLabelWidth
+groupWidth = groupWidth + label_width
+
+// Create the group with a default size and position, and name it
+var legendGroup = currentView.createObject("group", x, y, label_width + 40 + 20, 10, true)
+legendGroup.fontSize = defaultFontSize
+legendGroup.fillColor = "#ffffff"
+legendGroup.deriveLineColor = false
+legendGroup.lineColor = "#eaeded"
+legendGroup.name = groupName
+
+// Update 'y' value and groupHeight
+y += 15
+groupHeight += 30
+let i = 1
+for (let colorHex of typeSet) {
+  // Update the group width and height to ensure autonesting will work
+  legendGroup.bounds =  {width: groupWidth, height: groupHeight}
+  // Add the concept sized specifically to illustrate pictogram, and a note to bear the text, both with autonesting
+  //var object = currentView.add(pictogram, pictogram_x, y, default_width, default_height, true)
+  var currentNote = legendGroup.createObject("diagram-model-note", pictogram_x + label_x, y, label_width + 20, default_height)
+  currentNote.fontSize = defaultFontSize
+  currentNote.deriveLineColor = false
+  currentNote.lineColor = "#ffffff"
+  currentNote.fillColor = colorHex
+  currentNote.opacity = noteOpacity
+  currentNote.text = "Description " + i
+  currentNote.outlineOpacity  = noteOutlineOpacity
+
+  // Update 'y' value and groupHeight
+  y += 40
+  groupHeight += 40
+  i = i + 1
+}
+
+let origBounds = legendGroup.bounds
+legendGroup.bounds = { x: origBounds.x, y: origBounds.y, height: origBounds.height, width: label_width + 40 + 20 }
+
+
+console.log("> Ending properly")

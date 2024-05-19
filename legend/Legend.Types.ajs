@@ -1,0 +1,170 @@
+//
+// Generate diagram legend
+//
+// 2020 David GERARD
+// Adjustments from Yves Zoundi
+//
+// TODO cleanup the code...
+// # Variables
+
+var x = 10 ;
+var y = 10 ;
+var default_width = 30 ;
+var default_height = 30 ;
+var typesList = [] ;
+var pictogram_x = x + 10 ;
+var label_x = x + pictogram_x + 10 ;
+var label_width = default_width + 80 ;
+let maxLabelWidth = label_width;
+var groupWidth = 10 + default_width + 10 + label_width + 10 ;
+var groupHeight = default_height + y ;
+var prefix = "legend-purpose-" ;
+var groupName = "Legend" ;
+var noteFigureType = 0 ;
+var noteOpacity = 0 ;
+var noteOutlineOpacity  = 0 ;
+let Font = Java.type("java.awt.Font");
+let defaultFontName = "monospace";
+let defaultFontStyle = Font.PLAIN;
+let defaultFontSize = 10;
+
+
+// # Main
+
+console.show();
+console.clear();
+console.log("> Generate diagram legend:");
+
+var currentView  = $(selection).filter("archimate-diagram-model").first()
+if (! currentView) {
+  console.log("> No view identified: exiting.");
+  exit();
+}
+
+let typeMap = new Map()
+
+// Loop through all elements used in selected view and pus into array elements type
+$(currentView).find().not("relationship").each(function(e) {
+
+  if (e.type == 'diagram-model-group'
+      || e.type == 'diagram-model-note'
+      || e.type == 'diagram-model-connection'
+      || e.type == 'archimate-diagram-model') {
+    return
+  }
+  
+  let itemKey = e.specialization + "" + e.type
+  let itemValue = { type: e.type, spec: e.specialization }
+  let typeName = e.specialization  || e.type
+  typeMap.set(itemKey, itemValue)
+  let measuredLabelWidth = _legendStringWidth(typeName);
+  maxLabelWidth = Math.max(maxLabelWidth, measuredLabelWidth);
+})
+
+label_width = maxLabelWidth;
+
+typeMap.forEach(function (v, k, m) {
+  typesList.push(v)
+})
+
+// Alphabetically sort the array: [javascript - Sort objects in an array alphabetically on one property of the array - Stack Overflow](https://stackoverflow.com/questions/8900732/sort-objects-in-an-array-alphabetically-on-one-property-of-the-array)
+typesList.sort(function(a, b) {
+  let aKey = a.spec || a.type
+  let bKey = a.spec || a.type
+  var textA = aKey.toUpperCase().replaceAll(" ", "");
+  var textB = bKey.toUpperCase().replaceAll(" ", "");
+  return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+});
+
+const archiPrefs = Java.type('com.archimatetool.editor.ArchiPlugin').PREFERENCES;
+
+// Declare the Eclipse FontData class
+// See https://github.com/eclipse-platform/eclipse.platform.swt/blob/master/bundles/org.eclipse.swt/Eclipse%20SWT/gtk/org/eclipse/swt/graphics/FontData.java
+const FontDataClass = Java.type('org.eclipse.swt.graphics.FontData');
+
+// Get the default font string for diagram objects
+var defaultViewFont = archiPrefs.getString('defaultViewFont');
+
+// If we have it...
+if(defaultViewFont) {
+  let fontData = new FontDataClass(defaultViewFont);
+  defaultFontSize = Math.floor(fontData.getHeight() * 0.85);
+  defaultFontName = fontData.getName();
+  defaultFontStyle = fontData.getStyle();
+}
+
+function _legendStringWidth(nodeLabel) {
+  let Canvas = Java.type("java.awt.Canvas");
+  let font = new Font(defaultFontName, defaultFontStyle, defaultFontSize);
+  let c = new Canvas();
+  let fm = c.getFontMetrics(font);
+
+  return fm.stringWidth(nodeLabel);
+}
+
+// For each type found in the view
+for (var i=0; i<typesList.length; i++) {
+  let item = typesList[i]
+  let itemName = item.spec + "" + item.type
+  // Search the corresponding standard element to be used for legend purpose
+  theConcept = $("." + prefix + itemName).first() ;
+  if (!(theConcept)) {    
+    theConcept = model.createElement(item.type, (prefix + itemName))
+    if (item.spec)
+      theConcept.specialization = item.spec
+  };
+};
+
+// Create the group with a default size and position, and name it
+var legendGroup = currentView.createObject("group", x, y, 10, 10, true)
+legendGroup.fontSize = defaultFontSize;
+legendGroup.fillColor = "#ffffff"
+legendGroup.deriveLineColor = false
+legendGroup.lineColor = "#eaeded"
+legendGroup.name = groupName ;
+
+// Update 'y' value and groupHeight
+y += 30 ;
+groupHeight += 30 ;
+
+let objects = []
+
+for (var i=0; i<typesList.length; i++) {
+  let item = typesList[i]
+  let itemName = item.spec + "" + item.type
+  let itemLabel = item.spec || item.type
+  pictogram = $("."+prefix+ itemName).first() ;
+  // Update the group width and height to ensure autonesting will work
+  legendGroup.bounds =  {width: groupWidth, height: groupHeight};
+  // Add the concept sized specifically to illustrate pictogram, and a note to bear the text, both with autonesting
+  let object = currentView.add(pictogram, pictogram_x, y, default_width, default_height, true) ;
+  object.imagePosition = 4
+  object.deriveLineColor = false
+  object.lineColor = "#ffffff"
+  objects.push(object)
+  let noteX = object.bounds.x + object.bounds.width
+  let currentNote = currentView.createObject("note", noteX + 8, y, label_width, default_height, true) ;
+  currentNote.fontSize = defaultFontSize;
+  currentNote.textPosition = 1
+  //  let currentNote = currentView.createObject("note", pictogram_x + label_x, y, label_width, default_height, true) ;
+  currentNote.deriveLineColor = false
+  currentNote.lineColor = "#ffffff"
+  currentNote.setFigureType(noteFigureType);
+  currentNote.opacity = noteOpacity ;
+  currentNote.outlineOpacity  = noteOutlineOpacity ;
+
+  currentNote.labelExpression = itemLabel.replace(/(-)/g, " ").replace(/(\b[a-z](?!\s))/g, function(x){return x.toUpperCase();});
+  // Update 'y' value and groupHeight
+  y += 40 ;
+  groupHeight += 40 ;
+}
+
+while (objects.length != 0) {
+  let object = objects.pop()
+  object.name = ""
+}
+
+let origBounds = legendGroup.bounds;
+legendGroup.bounds = { x: origBounds.x, y: origBounds.y, height: origBounds.height, width: label_width + 40 + 20 };
+
+console.log("> Ending properly");

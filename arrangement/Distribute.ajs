@@ -1,0 +1,97 @@
+// Author: Yves Zoundi
+// Requires: jArchi - https://www.archimatetool.com/blog/2018/07/02/jarchi/
+// Purpose: Align to lowest, spread the selected elements horizontally or vertically
+// Date: 2024-05-10
+// Version 0.0.1
+// Change: Initial version based on similar previous jArchi scripts on GitHub
+
+console.clear()
+console.show()
+console.log("START: AlignSpread")
+
+let minY        = null
+let minX        = null
+let maxWidth    = 0
+let maxHeight   = 0
+let items       = []
+let choiceIndex  = 0
+let choiceTexts = ["Horizontally", "Vertically"]
+
+let choice = window.promptSelection("Spread Type", choiceTexts)
+
+if (choice) {
+  if (choice != choiceTexts[choiceIndex])
+    choiceIndex = choiceIndex + 1
+  
+  // Determine the width, height,  and 
+  $(selection).each(function(item) {
+    minY      = Math.min(item.bounds.y, minY==null?item.bounds.y:minY)
+    minX      = Math.min(item.bounds.x, minX==null?item.bounds.x:minX)
+    maxWidth  = Math.max(item.bounds.width, maxWidth)
+    maxHeight = Math.max(item.bounds.height, maxHeight)
+    items.push(item)
+  })
+
+  if (items.length <= 2) {
+    console.log("Nothing to do")
+    console.log("END: AlignSpread")
+    exit()
+  }
+
+  // Sort the selection so the order stays the same
+  if (choiceIndex == 0) {
+    items.sort(function (left, right) {
+      return left.bounds.x - right.bounds.x
+    })
+  } else {
+    items.sort(function (left, right) {
+      return left.bounds.y - right.bounds.y
+    })    
+  }
+
+  let gap = 0
+  let endX = 0
+  let endY = 0  
+  
+  if (choiceIndex == 0) {  
+    items.forEach(function (item) {
+      if (endX != 0)
+        gap += Math.max(0, (item.bounds.x - endX))
+
+      endX = item.bounds.x + item.bounds.width
+    })    
+
+    let avgGap = Math.floor(gap / Math.max(1, (items.length - 1)))
+    let newX = items[0].bounds.x + items[0].bounds.width + avgGap
+
+    for (let i = 1; i < (items.length - 1); i++) {
+      let item = items[i]
+      let itemX = newX
+      let itemWidth = item.bounds.width
+      let itemHeight = item.bounds.height
+      item.bounds = {x: itemX , y: minY, width: itemWidth, height: itemHeight}
+      newX = itemX + itemWidth + avgGap
+    }    
+  } else {
+    items.forEach(function (item) {
+      if (endY != 0)
+        gap+= Math.max(0, item.bounds.y - endY)
+
+      endY = item.bounds.y + item.bounds.height
+    })
+
+    let avgGap = Math.floor(gap / Math.max(1, (items.length - 1)))
+    let newY = items[0].bounds.y + items[0].bounds.height + avgGap
+
+    for (let i = 1; i < (items.length - 1); i++) {
+      let item = items[i]
+      let itemY = newY
+      let itemWidth = item.bounds.width
+      let itemHeight = item.bounds.height
+      item.bounds = {x: minX , y: itemY, width: itemWidth, height: itemHeight}
+      newY = itemY + itemHeight + avgGap
+    }
+  }
+}
+
+console.log("END: AlignSpread")

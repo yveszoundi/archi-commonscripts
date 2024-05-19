@@ -1,0 +1,19 @@
+console.clear()
+console.show()
+
+console.log("START: UpdatedNote")
+
+$(selection).each(function(e) {
+  if (e.type == "diagram-model-note") {
+    let origBounds = e.bounds
+    let date = new Date()
+    let contents = "Last updated on " + date.toISOString().substring(0, 10)
+    e.textAlignment = 1
+    e.text = contents
+    e.deriveLineColor = false
+    e.lineColor = "#FFFFFF"
+    e.bounds = { x: origBounds.x, y: origBounds.y, width: 195, height: 34 }
+  }
+})
+
+console.log("END: UpdatedNote")
